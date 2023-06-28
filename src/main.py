@@ -109,7 +109,7 @@ try:
             device.emit(uinput.BTN_A, 0)
 
         # Emit axes
-        device.emit(uinput.ABS_X, leftJoystickX, syn=False)
+        device.emit(uinput.ABS_X, rightJoystickX, syn=False)
         device.emit(uinput.ABS_Y, leftJoystickY)
         # device.emit(uinput.ABS_HAT1X, rightJoystickX, syn=False)
         # device.emit(uinput.ABS_HAT1Y, rightJoystickY)
