@@ -57,37 +57,44 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
     # Convert the 0-1 range into a value in the right range.
     return rightMin + (valueScaled * rightSpan)
 
-while True:
+try:
+    while True:
 
-    # Receive the client packet along with the address it is coming from
-    message, address = serverSocket.recvfrom(1024)
+        # Receive the client packet along with the address it is coming from
+        message, address = serverSocket.recvfrom(1024)
+        print("Got message", str(message))
 
-    try:
-        j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('>HHHH???', message)
-    except:
-        logging.warning("Could not read data from bytes: " + str(message))
-    j_raw = [j0x, j0y, j1x, j1y]
-    j_calib = [leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY]
+        try:
+            j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('>HHHH???', message)
+        except:
+            logging.warning("Could not read data from bytes: " + str(message))
+        j_raw = [j0x, j0y, j1x, j1y]
+        j_calib = [leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY]
 
-    for i, val in enumerate(j_raw):
-        j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, 0, 255)
+        for i, val in enumerate(j_raw):
+            j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, 0, 255)
 
-    # # Otherwise, the server responds
-    # serverSocket.sendto(message, address) 
+        # # Otherwise, the server responds
+        # serverSocket.sendto(message, address) 
 
-    if j0sw:
-        device.emit(uinput.BTN_THUMBL, 1)
-    else:
-        device.emit(uinput.BTN_THUMBL, 0)
+        if j0sw:
+            device.emit(uinput.BTN_THUMBL, 1)
+        else:
+            device.emit(uinput.BTN_THUMBL, 0)
 
-    if j1sw:
-        device.emit(uinput.BTN_THUMBR, 1)
-    else:
-        device.emit(uinput.BTN_THUMBR, 0)
+        if j1sw:
+            device.emit(uinput.BTN_THUMBR, 1)
+        else:
+            device.emit(uinput.BTN_THUMBR, 0)
 
-    # Emit axes
-    device.emit(uinput.ABS_HAT0X, leftJoystickX, syn=False)
-    device.emit(uinput.ABS_HAT0Y, leftJoystickY)
-    device.emit(uinput.ABS_HAT1X, rightJoystickX, syn=False)
-    device.emit(uinput.ABS_HAT1Y, rightJoystickY)
+        # Emit axes
+        device.emit(uinput.ABS_HAT0X, leftJoystickX, syn=False)
+        device.emit(uinput.ABS_HAT0Y, leftJoystickY)
+        device.emit(uinput.ABS_HAT1X, rightJoystickX, syn=False)
+        device.emit(uinput.ABS_HAT1Y, rightJoystickY)
+except KeyboardInterrupt:
+    pass
+finally:
+    serverSocket.close()
+
 
