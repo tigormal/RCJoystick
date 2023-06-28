@@ -1,9 +1,13 @@
 from socket import *
 import struct
 import uinput
+import logging
+
+logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.DEBUG)
 
 # Create a UDP socket
 # Notice the use of SOCK_DGRAM for UDP packets
+logging.info("Starting server")
 serverSocket = socket(AF_INET, SOCK_DGRAM)
 
 # Assign IP address and port number to socket
@@ -28,6 +32,9 @@ events = (
     # uinput.ABS_X + (0, 255, 0, 0),
     # uinput.ABS_Y + (0, 255, 0, 0),
 )
+
+logging.info("Creating device")
+
 device = uinput.Device(
     events,
     vendor=0x045e,
@@ -55,7 +62,10 @@ while True:
     # Receive the client packet along with the address it is coming from
     message, address = serverSocket.recvfrom(1024)
 
-    j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('>HHHH???', message)
+    try:
+        j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('>HHHH???', message)
+    except:
+        logging.warning("Could not read data from bytes: " + str(message))
     j_raw = [j0x, j0y, j1x, j1y]
     j_calib = [leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY]
 
