@@ -13,9 +13,9 @@ serverSocket = socket(AF_INET, SOCK_DGRAM)
 # Assign IP address and port number to socket
 serverSocket.bind(('', 1234))
 
-JS_MIN_VAL = 0
+JS_MIN_VAL = 142
 JS_MID_VAL = 1650
-JS_MAX_VAL = 3300
+JS_MAX_VAL = 3165
 
 leftJoystickX = 0
 leftJoystickY = 0
@@ -65,14 +65,22 @@ try:
         print("Got message", str(message))
 
         try:
-            j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('>HHHH???', message)
+            j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('<HHHH???', message)
+            print(j0x, j0y, j1x, j1y, j0sw, j1sw, onoff)
         except:
             logging.warning("Could not read data from bytes: " + str(message))
-        j_raw = [j0x, j0y, j1x, j1y]
-        j_calib = [leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY]
+        # j_raw = [j0x, j0y, j1x, j1y]
+        # j_calib = [leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY]
 
-        for i, val in enumerate(j_raw):
-            j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, 0, 255)
+        # for i, val in enumerate(j_raw):
+        #     j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, 0, 255)
+        leftJoystickX = int(translate(j0x, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
+        leftJoystickY = int(translate(j0y, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
+        rightJoystickX = int(translate(j1x, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
+        rightJoystickY = int(translate(j1y, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
+        
+
+        print(leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY)
 
         # # Otherwise, the server responds
         # serverSocket.sendto(message, address) 
