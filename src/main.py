@@ -23,14 +23,22 @@ rightJoystickX = 0
 rightJoystickY = 0
 
 events = (
-    uinput.ABS_HAT0X  + (0, 255, 0, 0),
-    uinput.ABS_HAT0Y  + (0, 255, 0, 0),
-    uinput.ABS_HAT1X  + (0, 255, 0, 0),
-    uinput.ABS_HAT1Y  + (0, 255, 0, 0),
+    # uinput.ABS_HAT0X  + (0, 255, 0, 0),
+    # uinput.ABS_HAT0Y  + (0, 255, 0, 0),
+    # uinput.ABS_HAT1X  + (0, 255, 0, 0),
+    # uinput.ABS_HAT1Y  + (0, 255, 0, 0),
+    # uinput.BTN_THUMBL,
+    # uinput.BTN_THUMBR,
+    uinput.BTN_A,
+    uinput.BTN_B,
+    uinput.BTN_X,
+    uinput.BTN_Y,
+    uinput.BTN_TL,
+    uinput.BTN_TR,
     uinput.BTN_THUMBL,
     uinput.BTN_THUMBR,
-    # uinput.ABS_X + (0, 255, 0, 0),
-    # uinput.ABS_Y + (0, 255, 0, 0),
+    uinput.ABS_X + (0, 255, 0, 0),
+    uinput.ABS_Y + (0, 255, 0, 0),
 )
 
 logging.info("Creating device")
@@ -43,10 +51,10 @@ device = uinput.Device(
     name="Microsoft X-Box 360 pad",
 )
 
-device.emit(uinput.ABS_HAT0X, 128, syn=False)
-device.emit(uinput.ABS_HAT0Y, 128)
-device.emit(uinput.ABS_HAT1X, 128, syn=False)
-device.emit(uinput.ABS_HAT1Y, 128)
+device.emit(uinput.ABS_X, 128, syn=False)
+device.emit(uinput.ABS_Y, 128)
+# device.emit(uinput.ABS_HAT1X, 128, syn=False)
+# device.emit(uinput.ABS_HAT1Y, 128)
 
 def translate(value, leftMin, leftMax, rightMin, rightMax):
     # Figure out how 'wide' each range is
@@ -96,10 +104,10 @@ try:
             device.emit(uinput.BTN_THUMBR, 0)
 
         # Emit axes
-        device.emit(uinput.ABS_HAT0X, leftJoystickX, syn=False)
-        device.emit(uinput.ABS_HAT0Y, leftJoystickY)
-        device.emit(uinput.ABS_HAT1X, rightJoystickX, syn=False)
-        device.emit(uinput.ABS_HAT1Y, rightJoystickY)
+        device.emit(uinput.ABS_X, leftJoystickX, syn=False)
+        device.emit(uinput.ABS_Y, leftJoystickY)
+        # device.emit(uinput.ABS_HAT1X, rightJoystickX, syn=False)
+        # device.emit(uinput.ABS_HAT1Y, rightJoystickY)
 except KeyboardInterrupt:
     pass
 finally:
