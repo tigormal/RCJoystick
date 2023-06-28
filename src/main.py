@@ -37,8 +37,8 @@ events = (
     uinput.BTN_TR,
     uinput.BTN_THUMBL,
     uinput.BTN_THUMBR,
-    uinput.ABS_X + (0, 255, 0, 0),
-    uinput.ABS_Y + (0, 255, 0, 0),
+    uinput.ABS_X + (0, 1024, 0, 0),
+    uinput.ABS_Y + (0, 1024, 0, 0),
 )
 
 logging.info("Creating device")
@@ -51,8 +51,8 @@ device = uinput.Device(
     name="Microsoft X-Box 360 pad",
 )
 
-device.emit(uinput.ABS_X, 128, syn=False)
-device.emit(uinput.ABS_Y, 128)
+device.emit(uinput.ABS_X, 512, syn=False)
+device.emit(uinput.ABS_Y, 512)
 # device.emit(uinput.ABS_HAT1X, 128, syn=False)
 # device.emit(uinput.ABS_HAT1Y, 128)
 
@@ -82,10 +82,10 @@ try:
 
         # for i, val in enumerate(j_raw):
         #     j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, 0, 255)
-        leftJoystickX = int(translate(j0x, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
-        leftJoystickY = int(translate(j0y, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
-        rightJoystickX = int(translate(j1x, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
-        rightJoystickY = int(translate(j1y, JS_MIN_VAL, JS_MAX_VAL, 0, 255))
+        leftJoystickX = int(translate(j0x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
+        leftJoystickY = int(translate(j0y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
+        rightJoystickX = int(translate(j1x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
+        rightJoystickY = int(translate(j1y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
         
 
         print(leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY)
@@ -102,6 +102,11 @@ try:
             device.emit(uinput.BTN_THUMBR, 1)
         else:
             device.emit(uinput.BTN_THUMBR, 0)
+
+        if onoff:
+            device.emit(uinput.BTN_A, 1)
+        else:
+            device.emit(uinput.BTN_A, 0)
 
         # Emit axes
         device.emit(uinput.ABS_X, leftJoystickX, syn=False)
