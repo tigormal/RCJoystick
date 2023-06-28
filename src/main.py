@@ -19,16 +19,14 @@ rightJoystickX = 0
 rightJoystickY = 0
 
 events = (
-    uinput.BTN_A,
-    uinput.BTN_B,
-    uinput.BTN_X,
-    uinput.BTN_Y,
-    uinput.BTN_TL,
-    uinput.BTN_TR,
+    uinput.ABS_HAT0X  + (0, 255, 0, 0),
+    uinput.ABS_HAT0Y  + (0, 255, 0, 0),
+    uinput.ABS_HAT1X  + (0, 255, 0, 0),
+    uinput.ABS_HAT1Y  + (0, 255, 0, 0),
     uinput.BTN_THUMBL,
     uinput.BTN_THUMBR,
-    uinput.ABS_X + (0, 255, 0, 0),
-    uinput.ABS_Y + (0, 255, 0, 0),
+    # uinput.ABS_X + (0, 255, 0, 0),
+    # uinput.ABS_Y + (0, 255, 0, 0),
 )
 device = uinput.Device(
     events,
@@ -38,8 +36,10 @@ device = uinput.Device(
     name="Microsoft X-Box 360 pad",
 )
 
-device.emit(uinput.ABS_X, 128, syn=False)
-device.emit(uinput.ABS_Y, 128)
+device.emit(uinput.ABS_HAT0X, 128, syn=False)
+device.emit(uinput.ABS_HAT0Y, 128)
+device.emit(uinput.ABS_HAT1X, 128, syn=False)
+device.emit(uinput.ABS_HAT1Y, 128)
 
 def translate(value, leftMin, leftMax, rightMin, rightMax):
     # Figure out how 'wide' each range is
@@ -60,21 +60,24 @@ while True:
     j_calib = [leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY]
 
     for i, val in enumerate(j_raw):
-        j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, -1.0, 1.0)
+        j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, 0, 255)
 
     # # Otherwise, the server responds
     # serverSocket.sendto(message, address) 
 
     if j0sw:
-        ...
+        device.emit(uinput.BTN_THUMBL, 1)
     else:
-        ...
+        device.emit(uinput.BTN_THUMBL, 0)
 
     if j1sw:
-        ...
+        device.emit(uinput.BTN_THUMBR, 1)
     else:
-        ...
+        device.emit(uinput.BTN_THUMBR, 0)
 
     # Emit axes
-    ...
+    device.emit(uinput.ABS_HAT0X, leftJoystickX, syn=False)
+    device.emit(uinput.ABS_HAT0Y, leftJoystickY)
+    device.emit(uinput.ABS_HAT1X, rightJoystickX, syn=False)
+    device.emit(uinput.ABS_HAT1Y, rightJoystickY)
 
