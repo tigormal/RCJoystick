@@ -70,11 +70,11 @@ try:
 
         # Receive the client packet along with the address it is coming from
         message, address = serverSocket.recvfrom(1024)
-        print("Got message", str(message))
+        # print("Got message", str(message))
 
         try:
             j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('<HHHH???', message)
-            print(j0x, j0y, j1x, j1y, j0sw, j1sw, onoff)
+            # print(j0x, j0y, j1x, j1y, j0sw, j1sw, onoff)
         except:
             logging.warning("Could not read data from bytes: " + str(message))
         # j_raw = [j0x, j0y, j1x, j1y]
@@ -88,7 +88,7 @@ try:
         rightJoystickY = int(translate(j1y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
         
 
-        print(leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY)
+        # print(leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY)
 
         # # Otherwise, the server responds
         # serverSocket.sendto(message, address) 
