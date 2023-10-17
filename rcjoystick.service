@@ -1,0 +1,15 @@
+[Unit]
+  Description=Remote Control Joystick
+ 
+[Service]
+  ExecStart=/usr/bin/python3 -u /rover/RCJoystick/src/main.py
+  Type=idle
+  KillMode=process
+ 
+  SyslogIdentifier=rcjoystick
+  SyslogFacility=daemon
+ 
+  Restart=on-failure
+ 
+[Install]
+  WantedBy=multiuser.target

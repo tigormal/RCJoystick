@@ -1,4 +1,4 @@
-from socket import *
+from socket import socket, AF_INET, SOCK_DGRAM
 import struct
 import uinput
 import logging
@@ -23,12 +23,6 @@ rightJoystickX = 0
 rightJoystickY = 0
 
 events = (
-    # uinput.ABS_HAT0X  + (0, 255, 0, 0),
-    # uinput.ABS_HAT0Y  + (0, 255, 0, 0),
-    # uinput.ABS_HAT1X  + (0, 255, 0, 0),
-    # uinput.ABS_HAT1Y  + (0, 255, 0, 0),
-    # uinput.BTN_THUMBL,
-    # uinput.BTN_THUMBR,
     uinput.BTN_A,
     uinput.BTN_B,
     uinput.BTN_X,
@@ -48,13 +42,16 @@ device = uinput.Device(
     vendor=0x045e,
     product=0x028e,
     version=0x110,
-    name="Microsoft X-Box 360 pad",
+    # name="Microsoft X-Box 360 pad",
+    name="Generic Remote Joystick",
 )
 
 device.emit(uinput.ABS_X, 512, syn=False)
 device.emit(uinput.ABS_Y, 512)
 # device.emit(uinput.ABS_HAT1X, 128, syn=False)
 # device.emit(uinput.ABS_HAT1Y, 128)
+
+j0x, j0y, j1x, j1y, j0sw, j1sw, onoff, bt1, bt2, bt3, bt4 = tuple([None]*11)
 
 def translate(value, leftMin, leftMax, rightMin, rightMax):
     # Figure out how 'wide' each range is
@@ -67,52 +64,48 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
 
 try:
     while True:
-
-        # Receive the client packet along with the address it is coming from
         message, address = serverSocket.recvfrom(1024)
         # print("Got message", str(message))
 
         try:
-            j0x, j0y, j1x, j1y, j0sw, j1sw, onoff = struct.unpack('<HHHH???', message)
+            j0x, j0y, j1x, j1y, j0sw, j1sw, onoff, bt1, bt2, bt3, bt4 = struct.unpack('<HHHH???????', message)
             # print(j0x, j0y, j1x, j1y, j0sw, j1sw, onoff)
         except:
             logging.warning("Could not read data from bytes: " + str(message))
-        # j_raw = [j0x, j0y, j1x, j1y]
-        # j_calib = [leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY]
 
-        # for i, val in enumerate(j_raw):
-        #     j_calib[i] = translate(val, JS_MIN_VAL, JS_MAX_VAL, 0, 255)
+
         leftJoystickX = int(translate(j0x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
         leftJoystickY = int(translate(j0y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
         rightJoystickX = int(translate(j1x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
         rightJoystickY = int(translate(j1y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
-        
-
         # print(leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY)
 
-        # # Otherwise, the server responds
-        # serverSocket.sendto(message, address) 
 
-        if j0sw:
-            device.emit(uinput.BTN_THUMBL, 1)
-        else:
-            device.emit(uinput.BTN_THUMBL, 0)
+        if j0sw is not None:
+            device.emit(uinput.BTN_THUMBL, j0sw)
 
-        if j1sw:
-            device.emit(uinput.BTN_THUMBR, 1)
-        else:
-            device.emit(uinput.BTN_THUMBR, 0)
+        if j1sw is not None:
+            device.emit(uinput.BTN_THUMBR, j1sw)
 
-        if onoff:
-            device.emit(uinput.BTN_A, 1)
-        else:
-            device.emit(uinput.BTN_A, 0)
+        if onoff is not None:
+            device.emit(uinput.BTN_TR, onoff)
+
+        if bt1 is not None:
+            device.emit(uinput.BTN_A, bt1)
+
+        if bt2 is not None:
+            device.emit(uinput.BTN_B, bt2)
+
+        if bt3 is not None:
+            device.emit(uinput.BTN_X, bt3)
+
+        if bt4 is not None:
+            device.emit(uinput.BTN_Y, bt4)
 
         # Emit axes
         device.emit(uinput.ABS_X, rightJoystickX, syn=False)
         device.emit(uinput.ABS_Y, leftJoystickY)
-        # device.emit(uinput.ABS_HAT1X, rightJoystickX, syn=False)
-        # device.emit(uinput.ABS_HAT1Y, rightJoystickY)
+
 except KeyboardInterrupt:
     pass
 finally:
