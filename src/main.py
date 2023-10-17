@@ -1,9 +1,11 @@
+#!/usr/bin/python
 from socket import socket, AF_INET, SOCK_DGRAM
 import struct
 import uinput
 import logging
+import time
 
-logging.basicConfig(filename='log.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 # Create a UDP socket
 # Notice the use of SOCK_DGRAM for UDP packets
@@ -46,6 +48,8 @@ device = uinput.Device(
     name="Generic Remote Joystick",
 )
 
+logging.debug("Created device")
+
 device.emit(uinput.ABS_X, 512, syn=False)
 device.emit(uinput.ABS_Y, 512)
 # device.emit(uinput.ABS_HAT1X, 128, syn=False)
@@ -62,53 +66,59 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
     # Convert the 0-1 range into a value in the right range.
     return rightMin + (valueScaled * rightSpan)
 
-try:
-    while True:
-        message, address = serverSocket.recvfrom(1024)
-        # print("Got message", str(message))
-
-        try:
-            j0x, j0y, j1x, j1y, j0sw, j1sw, onoff, bt1, bt2, bt3, bt4 = struct.unpack('<HHHH???????', message)
-            # print(j0x, j0y, j1x, j1y, j0sw, j1sw, onoff)
-        except:
-            logging.warning("Could not read data from bytes: " + str(message))
-
-
-        leftJoystickX = int(translate(j0x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
-        leftJoystickY = int(translate(j0y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
-        rightJoystickX = int(translate(j1x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
-        rightJoystickY = int(translate(j1y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
-        # print(leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY)
-
-
-        if j0sw is not None:
-            device.emit(uinput.BTN_THUMBL, j0sw)
-
-        if j1sw is not None:
-            device.emit(uinput.BTN_THUMBR, j1sw)
-
-        if onoff is not None:
-            device.emit(uinput.BTN_TR, onoff)
-
-        if bt1 is not None:
-            device.emit(uinput.BTN_A, bt1)
-
-        if bt2 is not None:
-            device.emit(uinput.BTN_B, bt2)
-
-        if bt3 is not None:
-            device.emit(uinput.BTN_X, bt3)
-
-        if bt4 is not None:
-            device.emit(uinput.BTN_Y, bt4)
-
-        # Emit axes
-        device.emit(uinput.ABS_X, rightJoystickX, syn=False)
-        device.emit(uinput.ABS_Y, leftJoystickY)
-
-except KeyboardInterrupt:
-    pass
-finally:
-    serverSocket.close()
+if __name__ == '__main__':
+    try:
+        logging.debug("Entering cycle")
+        # time.sleep(5)
+        while True:
+            message, address = serverSocket.recvfrom(1024)
+            # print("Got message", str(message))
+    
+            try:
+                j0x, j0y, j1x, j1y, j0sw, j1sw, onoff, bt1, bt2, bt3, bt4 = struct.unpack('<HHHH???????', message)
+                # print(j0x, j0y, j1x, j1y, j0sw, j1sw, onoff, bt1, bt2, bt3, bt4)
+            except:
+                logging.warning("Could not read data from bytes: " + str(message))
+                continue
+    
+    
+            leftJoystickX = int(translate(j0x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
+            leftJoystickY = int(translate(j0y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
+            rightJoystickX = int(translate(j1x, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
+            rightJoystickY = int(translate(j1y, JS_MIN_VAL, JS_MAX_VAL, 0, 1024))
+            # print(leftJoystickX, leftJoystickY, rightJoystickX, rightJoystickY)
+    
+    
+            if j0sw is not None:
+                device.emit(uinput.BTN_THUMBL, j0sw)
+    
+            if j1sw is not None:
+                device.emit(uinput.BTN_THUMBR, j1sw)
+    
+            if onoff is not None:
+                device.emit(uinput.BTN_TR, onoff)
+    
+            if bt1 is not None:
+                device.emit(uinput.BTN_A, bt1)
+    
+            if bt2 is not None:
+                device.emit(uinput.BTN_B, bt2)
+    
+            if bt3 is not None:
+                device.emit(uinput.BTN_X, bt3)
+    
+            if bt4 is not None:
+                device.emit(uinput.BTN_Y, bt4)
+    
+            # Emit axes
+            device.emit(uinput.ABS_X, rightJoystickX, syn=False)
+            device.emit(uinput.ABS_Y, leftJoystickY)
+        logging.debug("Exiting cycle")
+    
+    except KeyboardInterrupt:
+        pass
+    finally:
+        logging.debug("Closing socket")
+        serverSocket.close()
 
 
